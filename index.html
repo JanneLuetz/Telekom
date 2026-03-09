@@ -1,1 +1,792 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Janne Lütz – Bewerbung IT-System-Elektroniker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090c14;
+    --surface: #0d1120;
+    --card: #111827;
+    --border: #1e2d47;
+    --accent: #00e5ff;
+    --accent2: #ff3cac;
+    --accent3: #7b61ff;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
 
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s ease, width 0.25s, height 0.25s;
+    opacity: 0.5;
+  }
+
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.35;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.6;
+  }
+
+  .page { position: relative; z-index: 2; }
+
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.3s forwards;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .tag::before {
+    content: '';
+    display: inline-block;
+    width: 28px; height: 1px;
+    background: var(--accent);
+  }
+
+  .hero-name {
+    font-size: clamp(3.5rem, 10vw, 8rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 70%, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-family: var(--mono);
+    font-size: clamp(0.85rem, 2vw, 1.05rem);
+    color: var(--muted);
+    margin-top: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+    max-width: 600px;
+    line-height: 1.8;
+  }
+
+  .hero-subtitle .hl { color: var(--accent2); }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    opacity: 0;
+    animation: fadeIn 1s 2s forwards;
+  }
+  .scroll-hint .line {
+    width: 1px; height: 48px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollLine 1.8s ease-in-out infinite;
+  }
+
+  .section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  .letter-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .letter-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent), var(--accent3));
+  }
+
+  .letter-header {
+    padding: 2.5rem 3rem;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: end;
+  }
+
+  .sender-block .name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  .sender-block p {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 2;
+  }
+  .sender-block a { color: var(--accent); text-decoration: none; }
+
+  .date-block {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .letter-recipient {
+    padding: 2rem 3rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 2;
+  }
+  .letter-recipient .company { color: var(--text); font-weight: 700; }
+
+  .letter-subject {
+    padding: 2rem 3rem 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+  }
+
+  .letter-body {
+    padding: 2rem 3rem 3rem;
+    line-height: 1.9;
+    font-size: 0.95rem;
+    color: #c8d3e0;
+  }
+  .letter-body p { margin-bottom: 1.4rem; }
+  .letter-body p:last-child { margin-bottom: 0; }
+
+  .letter-body .keyword {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .signature {
+    padding: 0 3rem 2.5rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .signature .sig-name {
+    font-size: 1.1rem;
+    color: #fff;
+    font-family: var(--sans);
+    font-weight: 700;
+    margin-top: 1.5rem;
+    display: block;
+    font-style: italic;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .skill-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .skill-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+  }
+  .skill-item.visible { animation: fadeUp 0.5s forwards; }
+
+  .skill-item .skill-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .skill-item .skill-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.4rem;
+  }
+  .skill-item .skill-desc {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .skill-item .bar {
+    margin-top: 1rem;
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .skill-item .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 1px;
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+  }
+
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent3), transparent);
+  }
+
+  .tl-item {
+    position: relative;
+    padding: 0 0 3rem 2rem;
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  .tl-item.visible { animation: fadeRight 0.6s forwards; }
+
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -5px; top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  .tl-date {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+  .tl-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.4rem;
+  }
+  .tl-sub {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .contact-strip {
+    border-top: 1px solid var(--border);
+    padding: 4rem 2rem;
+    text-align: center;
+    position: relative;
+  }
+  .contact-strip::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 200px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+  }
+
+  .contact-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .contact-pill {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .contact-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,229,255,0.05);
+  }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeRight {
+    from { opacity: 0; transform: translateX(-20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes scrollLine {
+    0%   { transform: scaleY(0); transform-origin: top; }
+    50%  { transform: scaleY(1); transform-origin: top; }
+    51%  { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  .hero-name:hover { animation: glitch 0.4s steps(2) forwards; }
+  @keyframes glitch {
+    0%   { text-shadow: -2px 0 var(--accent2), 2px 0 var(--accent); }
+    25%  { text-shadow:  2px 0 var(--accent2),-2px 0 var(--accent); }
+    50%  { text-shadow: -4px 0 var(--accent2), 4px 0 var(--accent); }
+    75%  { text-shadow:  4px 0 var(--accent2),-4px 0 var(--accent); }
+    100% { text-shadow: none; }
+  }
+
+  .scanline {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  @media (max-width: 640px) {
+    .letter-header { grid-template-columns: 1fr; }
+    .date-block { text-align: left; }
+    .letter-header, .letter-body, .letter-recipient,
+    .letter-subject, .signature { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+
+  .typewriter::after {
+    content: '|';
+    animation: blink 0.8s steps(1) infinite;
+    color: var(--accent);
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .stats-row {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 4rem;
+  }
+  .stat {
+    flex: 1;
+    min-width: 140px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    text-align: center;
+    border-radius: 2px;
+    opacity: 0;
+  }
+  .stat.visible { animation: fadeUp 0.5s forwards; }
+  .stat .num {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+  .stat .label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="scanline"></div>
+<canvas id="bg-canvas"></canvas>
+
+<div class="page">
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="tag">Bewerbung · Deutsche Telekom AG · 2026</div>
+      <h1 class="hero-name" id="heroName">Janne<br>Lütz</h1>
+      <p class="hero-subtitle">
+        <span class="typewriter" id="tw"></span><br><br>
+        Köln · <span class="hl">IT-System-Elektroniker</span>
+      </p>
+    </div>
+    <div class="scroll-hint">
+      <span>SCROLL</span>
+      <div class="line"></div>
+    </div>
+  </section>
+
+  <div class="section">
+    <div class="section-label">Auf einen Blick</div>
+    <div class="stats-row">
+      <div class="stat"><span class="num" data-target="3">0</span><span class="label">Jahre Ausbildung</span></div>
+      <div class="stat"><span class="num" data-target="2026">0</span><span class="label">Abschluss</span></div>
+      <div class="stat"><span class="num" data-target="4">0</span><span class="label">Skills</span></div>
+      <div class="stat"><span class="num" data-target="1">0</span><span class="label">Bewerbung</span></div>
+    </div>
+
+    <div class="section-label">Anschreiben</div>
+    <div class="letter-card">
+      <div class="letter-header">
+        <div class="sender-block">
+          <div class="name">Janne Lütz</div>
+          <p>
+            <a href="tel:+4915111680213">+49 151 11680213</a> · <a href="mailto:lutzjanne8@gmail.com">lutzjanne8@gmail.com</a>
+          </p>
+        </div>
+        <div class="date-block">Köln, 09. März 2026</div>
+      </div>
+
+      <div class="letter-recipient">
+        <span class="company">Deutsche Telekom AG</span><br>
+        Personalmanagement Ausbildung
+      </div>
+
+      <div class="letter-subject">
+        Bewerbung um eine Ausbildung zum IT-System-Elektroniker
+      </div>
+
+      <div class="letter-body">
+        <p>Sehr geehrte Damen und Herren,</p>
+
+        <p>mit großem Interesse habe ich Ihre Ausschreibung für eine Ausbildung zum <span class="keyword">IT-System-Elektroniker</span> bei der Deutschen Telekom AG entdeckt. Als eines der führenden Telekommunikationsunternehmen Europas bieten Sie genau das Umfeld, in dem ich meine Leidenschaft für <span class="keyword">Netzwerke</span>, Hardware und IT-Infrastrukturen in die Praxis umsetzen möchte.</p>
+
+        <p>Derzeit absolviere ich eine dreijährige schulische Ausbildung zum Informationstechnischen Assistenten am Georg-Simon-Ohm-Berufskolleg für Informations- und Medientechnik in Köln, die ich voraussichtlich im Juli 2026 mit dem Abschluss „Staatlich geprüfter Informationstechnischer Assistent" sowie der Fachhochschulreife abschließen werde. In meiner Ausbildung habe ich Kenntnisse in den Bereichen <span class="keyword">Netzwerktechnik</span>, <span class="keyword">Elektrotechnik</span>, <span class="keyword">Softwareentwicklung</span> und <span class="keyword">Betriebssysteme</span> erworben. Ich beschäftige mich dabei sowohl theoretisch als auch praktisch mit dem Aufbau von Netzwerken und Systemen.</p>
+
+        <p>Darüber hinaus verfüge ich über Grundkenntnisse in der Programmierung, unter anderem in <span class="keyword">C#</span>, was mir hilft, technische Zusammenhänge strukturiert zu verstehen und Lösungen gezielt zu erarbeiten. Mein IT-Interesse beschränkt sich nicht auf den Unterricht – in meiner Freizeit setze ich eigenständig kleinere Projekte um und lerne dauerhaft Neues dazu. So bin ich beispielsweise vertraut mit dem praktischen Umgang verschiedener Betriebssysteme und der Fehlerdiagnose an Hardware.</p>
+
+        <p>Die Deutsche Telekom begeistert mich besonders durch ihre Innovationskraft und ihre zentrale Rolle beim Ausbau moderner <span class="keyword">Kommunikationsinfrastruktur</span> in Deutschland – eine Infrastruktur, die ich selbst täglich nutze. Ich möchte nicht nur lernen, wie komplexe IT- und Netzwerksysteme installiert, betrieben und gewartet werden – ich möchte aktiv dazu beitragen, diese Infrastruktur zukunftssicher zu gestalten. Die Möglichkeit, in einem professionellen Team zu arbeiten und dabei sowohl handwerkliche als auch technische Fähigkeiten weiterzuentwickeln, motiviert mich sehr.</p>
+
+        <p>Ich bin überzeugt, dass ich mit meiner fachlichen Vorbildung, meinem ausgeprägten Interesse an IT-Systemen und meiner Leidenschaft eine wertvolle Ergänzung für Ihr Ausbildungsteam bin. Über eine Einladung zum Gespräch würde ich mich sehr freuen.</p>
+      </div>
+
+      <div class="signature">
+        Mit freundlichen Grüßen
+        <span class="sig-name">Janne Lütz</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="padding-top: 0;">
+    <div class="section-label">Fähigkeiten & Kenntnisse</div>
+    <div class="skills-grid">
+      <div class="skill-item">
+        <div class="skill-icon">🌐</div>
+        <div class="skill-name">Netzwerktechnik</div>
+        <div class="skill-desc">TCP/IP · Subnetting · Routing · LAN/WAN · Netzwerkoptimierung</div>
+        <div class="bar"><div class="bar-fill" data-width="85"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-icon">💻</div>
+        <div class="skill-name">Betriebssysteme</div>
+        <div class="skill-desc">Windows · Linux · Konfiguration · Administration · Troubleshooting</div>
+        <div class="bar"><div class="bar-fill" data-width="80"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-icon">⚙️</div>
+        <div class="skill-name">Programmierung</div>
+        <div class="skill-desc">C# · Logisches Denken · Problemlösung · Strukturiertes Arbeiten</div>
+        <div class="bar"><div class="bar-fill" data-width="60"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-icon">🔧</div>
+        <div class="skill-name">Hardware</div>
+        <div class="skill-desc">Fehlerdiagnose · Komponentenwissen · Praxisorientiert · Teamfähig</div>
+        <div class="bar"><div class="bar-fill" data-width="70"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="padding-top: 0;">
+    <div class="section-label">Werdegang</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-date">AUG 2023 – HEUTE</div>
+        <div class="tl-title">Georg-Simon-Ohm-Berufskolleg</div>
+        <div class="tl-sub">Informationstechnischer Assistent · Köln<br>Netzwerktechnik · Betriebssysteme · Programmierung · Medientechnik</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">JULI 2026 (ERWARTET)</div>
+        <div class="tl-title">Abschluss ITA + Fachhochschulreife</div>
+        <div class="tl-sub">Staatlich geprüfter Informationstechnischer Assistent<br>+ Fachhochschulreife</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">2026 →</div>
+        <div class="tl-title">Ausbildung IT-System-Elektroniker</div>
+        <div class="tl-sub">Deutsche Telekom AG · Nächster Schritt</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact-strip">
+    <div class="contact-title">Kontakt aufnehmen</div>
+    <div class="contact-links">
+      <a class="contact-pill" href="mailto:lutzjanne8@gmail.com">✉ lutzjanne8@gmail.com</a>
+      <a class="contact-pill" href="tel:+4915111680213">📞 +49 151 11680213</a>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 Janne Lütz · Bewerbung IT-System-Elektroniker · Deutsche Telekom AG
+  </footer>
+
+</div>
+
+<script>
+
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function animateCursor() {
+  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, dots = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', () => { resize(); initDots(); });
+
+function initDots() {
+  dots = [];
+  const count = Math.floor((W * H) / 12000);
+  for (let i = 0; i < count; i++) {
+    dots.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      r: Math.random() * 1.5 + 0.5
+    });
+  }
+}
+initDots();
+
+function drawFrame() {
+  ctx.clearRect(0, 0, W, H);
+  dots.forEach(d => {
+    d.x += d.vx; d.y += d.vy;
+    if (d.x < 0) d.x = W; if (d.x > W) d.x = 0;
+    if (d.y < 0) d.y = H; if (d.y > H) d.y = 0;
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,229,255,0.6)';
+    ctx.fill();
+  });
+
+  for (let i = 0; i < dots.length; i++) {
+    for (let j = i + 1; j < dots.length; j++) {
+      const dx = dots[i].x - dots[j].x, dy = dots[i].y - dots[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.moveTo(dots[i].x, dots[i].y);
+        ctx.lineTo(dots[j].x, dots[j].y);
+        ctx.strokeStyle = `rgba(0,229,255,${0.18 * (1 - dist/120)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawFrame);
+}
+drawFrame();
+
+const phrases = [
+  'IT-System-Elektroniker',
+  'Netzwerktechnik-Enthusiast',
+  'Problemlöser',
+  'Zukunft der Telekommunikation'
+];
+let pi = 0, ci = 0, del = false;
+const tw = document.getElementById('tw');
+function typeStep() {
+  const phrase = phrases[pi];
+  if (!del) {
+    tw.textContent = phrase.substring(0, ci + 1);
+    ci++;
+    if (ci === phrase.length) { del = true; setTimeout(typeStep, 1800); return; }
+    setTimeout(typeStep, 65);
+  } else {
+    tw.textContent = phrase.substring(0, ci - 1);
+    ci--;
+    if (ci === 0) { del = false; pi = (pi + 1) % phrases.length; setTimeout(typeStep, 400); return; }
+    setTimeout(typeStep, 35);
+  }
+}
+setTimeout(typeStep, 1200);
+
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      e.target.querySelectorAll('.bar-fill').forEach(b => {
+        b.style.width = b.dataset.width + '%';
+      });
+      e.target.querySelectorAll('.num[data-target]').forEach(n => {
+        const target = +n.dataset.target;
+        let current = 0;
+        const step = Math.ceil(target / 40);
+        const interval = setInterval(() => {
+          current = Math.min(current + step, target);
+          n.textContent = current;
+          if (current >= target) clearInterval(interval);
+        }, 30);
+      });
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.skill-item, .tl-item, .stat').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
